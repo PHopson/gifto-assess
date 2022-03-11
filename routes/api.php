@@ -55,6 +55,42 @@ Route::post('/register', function(Request $request) {
     
 });
 
+//Login, for now just check that email/password are correct
+Route::post('/login', function(Request $request) {
+    $input = $request->all();
+    if (!array_key_exists('email',$input) || !array_key_exists('password',$input)) {
+        return [
+            "error_code"=>400,
+            "error_title"=>"Login failure",
+            "error_message"=>"Both email and password must be provided."
+        ];
+    } else {
+        $getUser = User::where([
+            ['email','=',$input['email']],
+            ['password','=',$input['password']]
+            ])->get();
+        if (count($getUser)==0) {
+            return [
+                "error_code"=>101,
+                "error_title"=>"Login Failure",
+                "error_message"=>"Email or Password was Invalid!"
+            ];
+        } else {
+            return $getUser;
+        }
+    }
+    
+});
+
+//View messages between specified users
+Route::post('/view_messages', function(Request $request) {
+    $input = $request->all();
+});
+
+//Send a message
+Route::post('/send_message', function(Request $request) {
+    $input = $request->all();
+});
 
 //List all users, except the one specified
 //If none is specified, return them all
