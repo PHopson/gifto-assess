@@ -95,11 +95,11 @@ Route::get('/view_messages', function(Request $request) {
     }
 
     $msgs = Message::where([
-        "user_id_a"=>$input['user_id_a'],
-        "user_id_b"=>$input['user_id_b']
+        ["user_id_a",'=',$input['user_id_a']],
+        ["user_id_b",'=',$input['user_id_b']]
     ])->orWhere([
-        "user_id_a"=>$input['user_id_b'],
-        "user_id_b"=>$input['user_id_a']
+        ["user_id_a",'=',$input['user_id_b']],
+        ["user_id_b",'=',$input['user_id_a']]
     ])->get();
 
     return $msgs;
