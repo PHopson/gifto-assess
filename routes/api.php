@@ -83,13 +83,65 @@ Route::post('/login', function(Request $request) {
 });
 
 //View messages between specified users
-Route::post('/view_messages', function(Request $request) {
+Route::get('/view_messages', function(Request $request) {
     $input = $request->all();
+
+    if (!array_key_exists('user_id_a',$input) ||  !array_key_exists('user_id_b',$input)) {
+        return [
+            "error_code"=>400,
+            "error_title"=>"Failed to view messages",
+            "error_message"=>"Both a sending and receiving user must be provided."
+        ];
+    }
+
+    $msgs = Message::where([
+        "user_id_a"=>$input['user_id_a'],
+        "user_id_b"=>$input['user_id_b']
+    ])->orWhere([
+        "user_id_a"=>$input['user_id_b'],
+        "user_id_b"=>$input['user_id_a']
+    ])->get();
+
+    return $msgs;
 });
 
 //Send a message
 Route::post('/send_message', function(Request $request) {
     $input = $request->all();
+
+    if (!array_key_exists('sender_user_id',$input) || !array_key_exists('receiver_user_id',$input)) {
+        return [
+            "error_code"=>400,
+            "error_title"=>"Message send failure",
+            "error_message"=>"Both a sending and receiving user must be provided."
+        ];
+    }
+    if ($input['sender_user_id']==$input['receiver_user_id']) {
+        return [
+            "error_code"=>400,
+            "error_title"=>"Message send failure",
+            "error_message"=>"Users can't send messages to themselves."
+        ];
+    }
+    if (!array_key_exists('message',$input)) {
+        return [
+            "error_code"=>400,
+            "error_title"=>"Message send failure",
+            "error_message"=>"Cannot send a blank message"
+        ];
+    }
+
+    $msg = Message::create([
+        "user_id_a"=>$input["sender_user_id"],
+        "user_id_b"=>$input["receiver_user_id"],
+        "message"=>$input["message"]
+    ]);
+
+    return [
+        "success_code"=>200,
+        "success_title"=>"Message Sent",
+        "success_message"=>"Message was sent successfully"
+    ];
 });
 
 //List all users, except the one specified
